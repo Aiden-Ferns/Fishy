@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fishy?</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBF3E0;--card:#FFFDF6;--ink:#14141A;--mute:#615B50;--btn:#2E5BFF;--sh:#14141A;--ok:#7BD389;--warn:#FFD23F;--risk:#FF9F43;--bad:#FF5A4F;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15141A;--card:#201F27;--ink:#F5F0E4;--mute:#A9A296;--btn:#6C8BFF;--sh:#000}}
+:root[data-theme="dark"]{--bg:#15141A;--card:#201F27;--ink:#F5F0E4;--mute:#A9A296;--btn:#6C8BFF;--sh:#000}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.5 Archivo,system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px 56px}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;max-width:680px;margin:0 auto}
+.brand{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.sq{width:44px;height:44px;border:3px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);box-shadow:3px 3px 0 var(--sh);font-size:19px;cursor:pointer}
+h1{font-size:clamp(38px,11vw,58px);line-height:.98;letter-spacing:-.04em;font-weight:800;margin:14px 0 12px}
+.lead{color:var(--mute);margin:0 0 22px}
+.box{background:var(--card);border:3px solid var(--ink);border-radius:20px;box-shadow:6px 6px 0 var(--sh);padding:14px}
+textarea{width:100%;min-height:130px;resize:vertical;border:0;background:transparent;color:var(--ink);font:400 16px/1.5 "Space Mono",ui-monospace,Menlo,monospace;outline:0}
+.go{display:block;width:100%;margin-top:22px;padding:16px;border:3px solid var(--ink);border-radius:18px;background:var(--btn);color:#fff;font:800 22px Archivo,system-ui,sans-serif;letter-spacing:-.02em;box-shadow:6px 6px 0 var(--sh);cursor:pointer}
+:root[data-theme="dark"] .go{color:#101018}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .go{color:#101018}}
+.go:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--sh)}
+.ex{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center;font-size:15px;color:var(--mute)}
+.chip{font:700 13px "Space Mono",ui-monospace,monospace;padding:7px 12px;border:3px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);cursor:pointer}
+#out{margin-top:30px}
+.verdict{border:3px solid var(--ink);border-radius:22px;box-shadow:6px 6px 0 var(--sh);padding:18px 20px;color:#14141A}
+.verdict h2{margin:0;font-size:30px;letter-spacing:-.03em;font-weight:800;line-height:1.05}
+.verdict p{margin:6px 0 0}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:20px;padding:6px 18px 14px;margin-top:20px}
+.card h3{font-size:20px;margin:14px 0 6px;letter-spacing:-.01em}
+.card ul{margin:0;padding-left:20px}.card li{margin:8px 0}
+code{font:400 14px "Space Mono",ui-monospace,monospace;word-break:break-all}
+.fine{font-size:14px;color:var(--mute);margin-top:22px}
+.rules{margin:44px 0 0;padding:0;list-style:none;display:grid;gap:14px}
+.rules li{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:12px 16px}
+.rules b{display:block;font-size:19px;letter-spacing:-.01em}
+h2.sec{font-size:26px;letter-spacing:-.03em;margin:44px 0 14px}
+button:focus-visible,textarea:focus-visible,a:focus-visible{outline:4px solid #2E5BFF;outline-offset:3px}
+.box:focus-within{outline:4px solid #2E5BFF;outline-offset:3px}
+</style>
+</head>
+<body>
+<header><span class="brand">🐟 Fishy?</span><button class="sq" id="theme" aria-label="Toggle dark mode">🌙</button></header>
+<main class="wrap">
+<h1>Strange link or message? Paste it.</h1>
+<p class="lead">Checked on your device. Nothing is sent anywhere.</p>
+<div class="box"><textarea id="in" placeholder="Paste the link or the whole message…" aria-label="Link or message to check"></textarea></div>
+<button class="go" id="go">Check it</button>
+<div class="ex"><span>Try one:</span><button class="chip" data-i="0">Bank alert</button><button class="chip" data-i="1">Free download</button><button class="chip" data-i="2">Normal text</button></div>
+<div id="out" aria-live="polite"></div>
+<p class="fine">A quick checklist, not a guarantee. It can’t see the live site, so a clean result doesn’t prove safety.</p>
+</main>
+<script>
+const EX=["URGENT: Your PayPal account is suspended. Verify within 24 hours or it will be closed: http://paypa1-secure-login.top/verify","Free game ROM + crack download, full version: http://free-roms-download.xyz/setup.exe","Hi! Your Amazon package arrives Tuesday. You can track it in the Amazon app."];
+const BR={paypal:"paypal.com",apple:"apple.com",google:"google.com",microsoft:"microsoft.com",amazon:"amazon.com",netflix:"netflix.com",facebook:"facebook.com",instagram:"instagram.com",whatsapp:"whatsapp.com",dhl:"dhl.com",fedex:"fedex.com",usps:"usps.com",chase:"chase.com",wellsfargo:"wellsfargo.com",coinbase:"coinbase.com",binance:"binance.com"};
+const SHORT=/^(bit\.ly|tinyurl\.com|t\.co|goo\.gl|is\.gd|cutt\.ly|rb\.gy|ow\.ly|shorturl\.at)$/;
+const BADTLD=/\.(zip|mov|top|xyz|click|icu|gq|tk|ml|cf|ga|buzz|rest|cam|sbs|cyou|monster)$/;
+const MSGR=[
+[/urgent|immediately|within 24 hours|act now|final notice|last warning|account (?:is )?(?:suspended|locked|closed)|unusual activity/,2,"It tries to rush you. Pressure is a classic scam tactic."],
+[/password|passcode|\botp\b|verification code|security code|one[- ]time code|\bpin\b|\bcvv\b|card number|social security|\bssn\b|seed phrase|recovery phrase/,4,"It asks for (or mentions) a secret like a password, code, or card number. Real companies don’t ask for these."],
+[/gift ?cards?|wire transfer|western union|bitcoin|crypto|zelle|cash ?app/,3,"It mentions a hard-to-reverse way to pay, such as gift cards, crypto, or wire transfers."],
+[/you(?:’|')?ve won|you won|winner|prize|lottery|inheritance|claim your|guaranteed (?:returns|profit)|double your/,2,"It promises a prize or easy money, which is how many scams lure people in."],
+[/don(?:’|')?t tell anyone|keep this (?:a )?secret|do not share this/,3,"It asks you to keep it secret from friends or family."],
+[/anydesk|teamviewer|remote access|tech support|your computer (?:is|has) (?:infected|a virus)/,3,"It mentions remote access or a computer virus. Scammers use this to take over devices."],
+[/verify your (?:account|identity)|confirm your (?:account|identity|details)|click (?:here|the link) to/,1,"It wants you to tap a link to confirm your details."]
+];
+function urlFlags(raw){
+ const f=[];let u;
+ try{u=new URL(/^https?:\/\//i.test(raw)?raw:"http://"+raw)}catch(e){return f}
+ const host=u.hostname.toLowerCase().replace(/\.$/,"");const path=decodeURIComponent(u.pathname+u.search).toLowerCase();
+ if(/^http:/i.test(raw))f.push([1,"Uses plain http, so the connection isn’t encrypted."]);
+ if(/^\d{1,3}(\.\d{1,3}){3}$/.test(host))f.push([3,"The address is a string of numbers instead of a name. Real companies rarely do this."]);
+ if(u.username)f.push([3,"There’s an @ in the link, a trick used to hide the real destination."]);
+ if(host.includes("xn--"))f.push([3,"The address uses special look-alike characters."]);
+ if(SHORT.test(host))f.push([2,"It’s a shortened link, so you can’t see where it really goes."]);
+ if(BADTLD.test(host))f.push([2,"The ending of the address (."+host.split(".").pop()+") is often used by throwaway sites."]);
+ if((host.match(/-/g)||[]).length>=3||host.split(".").length>4)f.push([2,"The address is unusually long or full of dashes."]);
+ const norm=host.replace(/0/g,"o").replace(/1/g,"l").replace(/3/g,"e").replace(/5/g,"s").replace(/rn/g,"m").replace(/vv/g,"w");
+ for(const b in BR){const d=BR[b],real=host===d||host.endsWith("."+d);
+  if(real)continue;
+  if(norm!==host&&norm.includes(b)){f.push([4,"The address imitates “"+b+"” with swapped characters (like 1 for l)."]);break}
+  if(host.includes(b)){f.push([3,"The address contains “"+b+"” but isn’t "+d+". It may be pretending to be them."]);break}}
+ if(/\.(exe|msi|scr|bat|apk|jar|dmg|iso)$/.test(u.pathname.toLowerCase()))f.push([3,"The link downloads a program file. Don’t open these from unknown sources."]);
+ if(/crack|keygen|activator|mod[- ]?apk|free[- ]download|\brom\b|torrent/.test(host+path))f.push([3,"Cracks, keygens, and free-download sites are one of the most common ways people catch malware."]);
+ return f;
+}
+function check(){
+ const t=document.getElementById("in").value.trim(),out=document.getElementById("out");
+ if(!t){out.innerHTML='<div class="card"><h3>Nothing to check yet</h3><p>Paste a link or message above, then tap Check it.</p></div>';return}
+ const low=t.toLowerCase(),urls=[...new Set((t.match(/\b(?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,24}(?::\d+)?(?:\/[^\s]*)?/gi)||[]).map(s=>s.replace(/[.,;:!?)]+$/,"")))].slice(0,3);
+ let score=0;const why=[];const seen=new Set();
+ const add=(w,s)=>{if(seen.has(s))return;seen.add(s);score+=w;why.push(s)};
+ urls.forEach(u=>urlFlags(u).forEach(([w,s])=>add(w,s)));
+ MSGR.forEach(([re,w,s])=>{if(re.test(low))add(w,s)});
+ const L=score===0?["ok","No red flags found","Nothing here matched common scam tricks. Still, only act if you were expecting it."]:score<=3?["warn","Be careful","A few things look off. Don’t rush."]:score<=6?["risk","Looks risky","Several warning signs. Treat this as a scam until you’ve confirmed otherwise."]:["bad","Very likely a scam","Many classic scam signs. Don’t click, reply, or pay."];
+ const tips=score===0?["Unsure? Contact the company through its official app or website."]:["Don’t tap links, reply, or share codes or card details.","To check, open the company’s app or type its address yourself.","Delete and report it. Already clicked or paid? Call your bank now."];
+ const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ out.innerHTML=`<div class="verdict" style="background:var(--${L[0]})"><h2>${L[1]}</h2><p>${L[2]}</p></div>
+ ${why.length?`<div class="card"><h3>Why</h3><ul>${why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>`:""}
+ ${urls.length?`<div class="card"><h3>Links found</h3><ul>${urls.map(u=>`<li><code>${esc(u)}</code></li>`).join("")}</ul></div>`:""}
+ <div class="card"><h3>What to do</h3><ul>${tips.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+ out.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});
+}
+document.getElementById("go").onclick=check;
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{document.getElementById("in").value=EX[b.dataset.i];check()});
+const root=document.documentElement,tb=document.getElementById("theme");
+try{const s=localStorage.getItem("sst-theme");if(s)root.dataset.theme=s}catch(e){}
+const dark=()=>root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+const paint=()=>{tb.textContent=dark()?"☀️":"🌙"};paint();
+tb.onclick=()=>{root.dataset.theme=dark()?"light":"dark";try{localStorage.setItem("sst-theme",root.dataset.theme)}catch(e){}paint()};
+</script>
+</body>
+</html>
